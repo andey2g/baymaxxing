@@ -1,0 +1,31 @@
+{
+  "name": "baymaxxing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andey2g/baymaxxing.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/andey2g/baymaxxing/issues"
+  },
+  "homepage": "https://github.com/andey2g/baymaxxing#readme",
+  "dependencies": {
+    "@sparticuz/chromium": "^147.0.2",
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "puppeteer": "^24.42.0",
+    "puppeteer-core": "^24.42.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  }
+}
