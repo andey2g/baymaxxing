@@ -107,39 +107,58 @@ async function fetchEbayHtml(url) {
   try {
     const page = await browser.newPage();
 
-    // Set a realistic viewport
-    await page.setViewport({ width: 1366, height: 768 });
+    // Randomise viewport slightly so it doesn't look identical every time
+    const width = 1280 + Math.floor(Math.random() * 200);
+    const height = 720 + Math.floor(Math.random() * 100);
+    await page.setViewport({ width, height });
 
-    // Set realistic user agent
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
     );
 
-    // Set extra headers to look like a real browser
     await page.setExtraHTTPHeaders({
       'Accept-Language': 'en-US,en;q=0.9',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
       'Accept-Encoding': 'gzip, deflate, br',
       'Connection': 'keep-alive',
       'Upgrade-Insecure-Requests': '1',
+      'Sec-CH-UA': '"Chromium";v="124", "Google Chrome";v="124"',
+      'Sec-CH-UA-Mobile': '?0',
+      'Sec-CH-UA-Platform': '"Windows"',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
     });
 
-    console.log('Navigating to:', url);
+    // Go to eBay homepage first then navigate to search
+    // This mimics real user behaviour and avoids cold-start detection
+    console.log('Visiting eBay homepage first...');
+    await page.goto('https://www.ebay.com', {
+      waitUntil: 'domcontentloaded',
+      timeout: 15000,
+    });
+
+    // Small random delay like a human
+    await new Promise(r => setTimeout(r, 1000 + Math.random() * 2000));
+
+    console.log('Navigating to search:', url);
     await page.goto(url, {
-      waitUntil: 'networkidle2',
+      waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
 
-    // Wait for listings to appear
+    // Wait a bit for results
+    await new Promise(r => setTimeout(r, 2000));
+
     await page.waitForSelector('.s-item', { timeout: 10000 })
-      .catch(() => console.log('Warning: .s-item not found — may be blocked or no results'));
+      .catch(() => console.log('Warning: .s-item not found'));
 
     const html = await page.content();
     console.log('HTML length:', html.length);
 
-    // Check if we got a real page or a block page
     if (html.length < 5000) {
-      console.log('HTML preview:', html.substring(0, 500));
+      console.log('HTML preview:', html.substring(0, 300));
       throw new Error('Got a very short response — likely blocked');
     }
 
